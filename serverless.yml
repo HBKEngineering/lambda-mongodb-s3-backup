@@ -1,0 +1,41 @@
+service: lambda-mongdob-s3-backup 
+
+custom: 
+  stage: "${opt:stage, self:provider.stage}" # this way we always have a stage
+
+provider:
+  stage: production
+  name: aws
+  runtime: nodejs6.10
+  iamRoleStatements:
+  - Effect: "Allow"
+    Action:
+      - ssm:GetParametersByPath
+      - ssm:GetParameters
+      - ssm:GetParameter
+    Resource: arn:aws:ssm:*:*:parameter/chartroom/api/${self:custom.stage}/core/CONNECTIONS_MONGO_URL
+   - Effect: "Allow"
+     Action:
+       - "s3:ListBucket"
+     Resource: MongoBackupBucket
+   - Effect: "Allow"
+     Action:
+       - "s3:PutObject"
+     Resource: MongoBackupsBucket
+
+package:
+ include:
+   - function/**
+
+functions:
+  backup:
+    handler: function/index.handler
+    events:
+     - schedule: rate(1 day)
+
+resources:
+ Resources:
+   MongoBackupBucket:
+     Type: AWS::S3::Bucket
+     Properties:
+       BucketName: com.hbkapps.chartroom.mongo-backups

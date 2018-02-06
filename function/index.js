@@ -6,10 +6,11 @@ const fs          = require('fs');
 const url         = require('url');
 const zipFolder   = require('zip-folder');
 const exec        = require('child_process').exec;
+const config      = require('./config');
 
-// Environment variables
-const mongoURI = process.env.MONGO_URL;
-const s3Path = process.env.S3_PATH;
+// config variables
+const mongoURI = config.MONGO_URI;
+const s3Path = config.S3_PATH;
 
 // Parsing MongoDB URI
 const mongoURIparsed = url.parse(mongoURI);

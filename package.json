@@ -4,10 +4,13 @@
   "description": "This is simple AWS Lambda function that uses mongodump to backup a MongoDB database.",
   "main": "index.js",
   "dependencies": {
-
+    "@hbkapps/convict-provider-awsssm": "git+https://github.com/HBKEngineering/convict-provider-awsSsm.git",
+    "convict": "git+https://github.com/HBKEngineering/node-convict.git",
     "zip-folder": "^1.0.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "serverless": "^1.26.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
