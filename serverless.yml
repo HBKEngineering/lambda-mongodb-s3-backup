@@ -4,6 +4,7 @@ custom:
   stage: "${opt:stage, self:provider.stage}" # this way we always have a stage
 
 provider:
+  memorySize: 3008
   timeout: 300
   stage: production
   name: aws
@@ -46,11 +47,29 @@ functions:
   backup:
     handler: index.handler
     events:
-     - schedule: rate(1 day)
+     - schedule: cron(0 19 * * ? *)
 
 resources:
  Resources:
    MongoBackupBucket:
      Type: AWS::S3::Bucket
      Properties:
-       BucketName: com.hbkapps.chartroom.production.mongo-backups
+       BucketName: com.hbkapps.chartroom.production.mongo-backups 
+       BucketEncryption: 
+        ServerSideEncryptionConfiguration: 
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+       VersioningConfiguration:
+        Status: Enabled
+       LifecycleConfiguration:
+        Rules:
+          - Id: InfrequentAccessRule
+            Status: Enabled
+            Transitions:
+              - TransitionInDays: '30'
+                StorageClass: STANDARD_IA
+          - Id: GlacierRule
+            Status: Enabled
+            Transitions:
+              - TransitionInDays: '365'
+                StorageClass: GLACIER
