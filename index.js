@@ -16,8 +16,6 @@ const s3Path = config.S3_PATH;
 // Parsing MongoDB URI
 const mongoURIparsed = parse(mongoURI);
 
-console.log(mongoURIparsed)
-
 var hosts = "";
 let sslFlag = "";
 let authDbFlag = "";
