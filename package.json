@@ -6,12 +6,17 @@
   "dependencies": {
     "@hbkapps/convict-provider-awsssm": "git+https://github.com/HBKEngineering/convict-provider-awsSsm.git",
     "convict": "git+https://github.com/HBKEngineering/node-convict.git",
+    "lodash.foreach": "^4.5.0",
+    "parse-mongo-url": "^1.1.1",
     "zip-folder": "^1.0.0"
   },
   "devDependencies": {
     "serverless": "^1.26.0"
   },
   "scripts": {
+    "serverless:invoke": "serverless invoke local -f backup",
+    "install": "lerna bootstrap",
+    "deploy": "serverless deploy",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

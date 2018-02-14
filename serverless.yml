@@ -8,28 +8,42 @@ provider:
   name: aws
   runtime: nodejs6.10
   iamRoleStatements:
-  - Effect: "Allow"
-    Action:
-      - ssm:GetParametersByPath
-      - ssm:GetParameters
-      - ssm:GetParameter
-    Resource: arn:aws:ssm:*:*:parameter/chartroom/api/${self:custom.stage}/core/CONNECTIONS_MONGO_URL
-   - Effect: "Allow"
-     Action:
-       - "s3:ListBucket"
-     Resource: MongoBackupBucket
-   - Effect: "Allow"
-     Action:
-       - "s3:PutObject"
-     Resource: MongoBackupsBucket
-
+    - Effect: "Allow"
+      Action:
+        - ssm:GetParametersByPath
+        - ssm:GetParameters
+        - ssm:GetParameter
+      Resource: arn:aws:ssm:*:*:parameter/chartroom/api/production/core*
+    - Effect: "Allow"
+      Action:
+        - ssm:GetParametersByPath
+        - ssm:GetParameters
+        - ssm:GetParameter
+      Resource: arn:aws:ssm:*:*:parameter/lambda-mongodb-s3-backup*
+    -  Effect: "Allow"
+       Action:
+         - "s3:ListBucket"
+       Resource:
+         Fn::Join:
+           - ""
+           - - "arn:aws:s3:::"
+             - Ref: MongoBackupBucket
+    -  Effect: "Allow"
+       Action:
+         - "s3:PutObject"
+       Resource:
+         Fn::Join:
+           - ""
+           - - "arn:aws:s3:::"
+             - Ref: MongoBackupBucket
+             - "/*"
 package:
  include:
-   - function/**
+   - functions/handler/**
 
 functions:
   backup:
-    handler: function/index.handler
+    handler: index.handler
     events:
      - schedule: rate(1 day)
 
@@ -38,4 +52,4 @@ resources:
    MongoBackupBucket:
      Type: AWS::S3::Bucket
      Properties:
-       BucketName: com.hbkapps.chartroom.mongo-backups
+       BucketName: com.hbkapps.chartroom.production.mongo-backups

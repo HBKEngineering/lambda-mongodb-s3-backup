@@ -1,5 +1,4 @@
 'use strict';
-
 // Dependencies
 const AWS         = require('aws-sdk');
 const fs          = require('fs');
@@ -7,17 +6,38 @@ const url         = require('url');
 const zipFolder   = require('zip-folder');
 const exec        = require('child_process').exec;
 const config      = require('./config');
+const parse       = require('parse-mongo-url');
+const _foreach    = require('lodash.foreach');
 
 // config variables
-const mongoURI = config.MONGO_URI;
-const s3Path = config.S3_PATH;
+const mongoURI = config.MONGODB_URL;
 
+const s3Path = config.S3_PATH;
 // Parsing MongoDB URI
-const mongoURIparsed = url.parse(mongoURI);
-const host = mongoURIparsed.host;
-const username = mongoURIparsed.auth.split(':')[0];
-const pass = mongoURIparsed.auth.split(':')[1];
-const dbName = mongoURIparsed.path.split('/')[1];
+const mongoURIparsed = parse(mongoURI);
+
+console.log(mongoURIparsed)
+
+var hosts = "";
+let sslFlag = "";
+let authDbFlag = "";
+
+const username = mongoURIparsed.auth.user;
+const pass = mongoURIparsed.auth.password;
+const dbName = mongoURIparsed.dbName;
+
+_foreach(mongoURIparsed.servers, function(item){
+  hosts += item.host + ":" + item.port + ","
+});
+
+// setting some flags 
+if(mongoURIparsed.rs_options.ssl){
+  sslFlag = "--ssl"
+}
+
+if(mongoURIparsed.db_options.authSource){
+  authDbFlag = "--authenticationDatabase " + mongoURIparsed.db_options.authSource
+}
 
 // Fetching S3 bucket
 const s3bucket = new AWS.S3({
@@ -35,9 +55,9 @@ module.exports.handler = (event, context, cb)=> {
   let fileName = (new Date()).toDateString().replace(/ /g, '') + '_' + (new Date()).getTime();
   let folderName = `/tmp/${fileName}/`;
   let filePath = `/tmp/${fileName}.zip`;
-
+  
   // Use the mongodump binary to get the data from MongoDB
-  exec(`mongodump -h ${host} -d ${dbName} -u ${username} -p ${pass} -o ${folderName}`, (error, stdout, stderr)=> {
+  exec(`mongodump -h ${hosts} -d ${dbName} -u ${username} -p ${pass} ${sslFlag} ${authDbFlag} -o ${folderName}`, (error, stdout, stderr)=> {
     if (error) {
         console.error(`exec error: ${error}`);
         return;
