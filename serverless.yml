@@ -1,9 +1,10 @@
-service: lambda-mongdob-s3-backup 
+service: mongodb-s3-backup 
 
 custom: 
   stage: "${opt:stage, self:provider.stage}" # this way we always have a stage
 
 provider:
+  timeout: 300
   stage: production
   name: aws
   runtime: nodejs6.10
